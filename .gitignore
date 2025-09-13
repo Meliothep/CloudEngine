@@ -1,0 +1,55 @@
+# -----------------------------
+# Visual Studio / CMake / Build
+# -----------------------------
+
+# Build folders
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/*.cmake
+/*.cbp
+/*.sln
+/*.vcxproj*
+/*.user
+/*.ninja
+
+# Output binaries
+/apps/*/Debug/
+/apps/*/Release/
+/apps/*/build/
+**/*.exe
+**/*.lib
+**/*.dll
+**/*.pdb
+**/*.obj
+**/*.o
+**/*.ilk
+**/*.idb
+**/*.ipdb
+
+# Generated files by CMake
+Makefile
+cmake_install.cmake
+CTestTestfile.cmake
+
+# -----------------------------
+# vcpkg
+# -----------------------------
+/vcpkg_installed/
+/scripts/buildsystems/vcpkg.cmake
+
+# -----------------------------
+# OS / Editor
+# -----------------------------
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+
+# Recycle Bin
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+
+# Linux
+*~
