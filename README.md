@@ -7,6 +7,7 @@ Its main goal is **to minimise redundant server-side work during rendering**, al
 
 ## 🎨 Project structure
 
+```
 CloudEngine/
 ├─ apps/
 │ ├─ Client/ # Client application
@@ -28,7 +29,7 @@ CloudEngine/
 ├─ .gitignore
 ├─ vcpkg.json
 └─ vcpkg-configuration.json
-
+```
 
 ---
 
