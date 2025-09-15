@@ -1,10 +1,12 @@
 #pragma once
-#include <iostream>
+#include "Utils/Logger.hpp"
+#include "Windows/IWindow.hpp"
 
-class VulkanRenderer {
+class VulkanRenderer{
 public:
-    VulkanRenderer() = default;
-    ~VulkanRenderer() = default;
-
-    void hello() const;
+    VulkanRenderer(Logger& logger): logger_(logger){}
+    
+    void Initialize(IWindow* window = nullptr);
+private:
+    Logger& logger_;
 };

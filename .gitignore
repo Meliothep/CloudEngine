@@ -53,3 +53,7 @@ $RECYCLE.BIN/
 
 # Linux
 *~
+
+# IDE 
+.idea
+.vscode
