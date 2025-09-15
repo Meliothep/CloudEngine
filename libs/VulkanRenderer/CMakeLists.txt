@@ -2,10 +2,10 @@ project(VulkanRenderer LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
-add_library(VulkanRenderer
-    src/VulkanRenderer.cpp
-    include/VulkanRenderer/VulkanRenderer.hpp
-)
+file(GLOB SOURCES "src/*/*.cpp")
+file(GLOB HEADERS "include/*/*.h" "include/*/*.hpp")
+
+add_library(VulkanRenderer ${SOURCES} ${HEADERS})
 
 target_include_directories(VulkanRenderer
     PUBLIC include
