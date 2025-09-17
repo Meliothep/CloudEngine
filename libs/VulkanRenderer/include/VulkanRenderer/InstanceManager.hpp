@@ -20,7 +20,7 @@ class Logger;
 class InstanceManager {
 public:
     InstanceManager(Logger& logger): logger_(logger) {}
-    ~InstanceManager(){};
+    ~InstanceManager() { Shutdown(); }
 
     void Initialize(bool enableValidationLayers = true, bool enableScreen = false);
     void Shutdown();
@@ -29,8 +29,8 @@ public:
 
 private:
     bool CheckValidationLayerSupport();
-    std::vector<const char*> GetRequiredExtensions(bool enableValidationLayers, bool enableSurface);
 
+    std::vector<const char*> GetRequiredExtensions(bool enableValidationLayers, bool enableSurface);
 private:
     Logger& logger_;
     
