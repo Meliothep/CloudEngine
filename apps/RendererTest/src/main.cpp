@@ -15,5 +15,11 @@ int main() {
     VulkanRenderer renderer(*logger);
     renderer.Initialize(window);
 
+    while(window->ProcessMessages()){
+        
+    }
+
+    renderer.Shutdown();
+
     return 0;
 }

@@ -1,24 +1,29 @@
 #include "VulkanRenderer/VulkanRenderer.hpp"
-#include "VulkanRenderer/InstanceManager.hpp"
-#include "VulkanRenderer/DeviceManager.hpp"
-#include "VulkanRenderer/SurfaceManager.hpp"
 
 void VulkanRenderer::Initialize(IWindow* window) {
-    logger_.Log(LogLevel::DEBUG, "InstanceManager : Initialization");
     bool enableScreen = window != nullptr;
 
-    InstanceManager instanceManager = InstanceManager(logger_);
-    instanceManager.Initialize(true, enableScreen);
+    instanceManager_ = std::make_unique<InstanceManager>(logger_);
+    instanceManager_->Initialize(true, enableScreen);
     
-    SurfaceManager surfaceManager(logger_);
-    surfaceManager.Initialize(instanceManager.GetInstance(), window);
+    surfaceManager_ = std::make_unique<SurfaceManager>(logger_);
+    surfaceManager_->Initialize(instanceManager_->GetInstance(), window);
 
-    DeviceManager deviceManager = DeviceManager(logger_);
-    deviceManager.Initialize(instanceManager.GetInstance(), surfaceManager.GetSurface(), enableScreen);
+    deviceManager_ = std::make_unique<DeviceManager>(logger_);
+    deviceManager_->Initialize(instanceManager_->GetInstance(), surfaceManager_->GetSurface(), enableScreen);
 
     logger_.Log(LogLevel::INFO, "Renderer initialized");
+}
 
-    surfaceManager.Shutdown();
-    deviceManager.Shutdown();
-    instanceManager.Shutdown();
+void VulkanRenderer::Shutdown(){
+    surfaceManager_->Shutdown();
+    surfaceManager_ = nullptr;
+
+    deviceManager_->Shutdown();
+    deviceManager_ = nullptr;
+    
+    instanceManager_->Shutdown();
+    instanceManager_ = nullptr;
+
+    logger_.Log(LogLevel::INFO, "Renderer Shutdown");
 }
