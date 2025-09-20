@@ -20,7 +20,7 @@ class Logger;
 class InstanceManager {
 public:
     InstanceManager(Logger& logger): logger_(logger) {}
-    ~InstanceManager() { Shutdown(); }
+    ~InstanceManager() = default;
 
     void Initialize(bool enableValidationLayers = true, bool enableScreen = false);
     void Shutdown();
