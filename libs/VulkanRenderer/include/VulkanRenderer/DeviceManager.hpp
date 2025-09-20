@@ -1,6 +1,5 @@
 #pragma once
 #include "Utils/Logger.hpp"
-#include "InstanceManager.hpp"
 
 #include <vulkan/vulkan.h>
 #include <optional>
@@ -37,6 +36,8 @@ public:
     VkQueue GetComputeQueue() const { return computeQueue_; }
     VkQueue GetPresentQueue() const { return presentQueue_; }
 
+    const QueueFamilyIndices& GetQueueFamilyIndices() const { return queueFamilyIndices_; }
+
 private:
     QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface, bool enableScreen);
     int RateDeviceSuitability(VkPhysicalDevice device);
@@ -60,4 +61,5 @@ private:
     VkQueue presentQueue_{ VK_NULL_HANDLE };
 
     std::vector<const char*> requiredDeviceExtensions_;
+    QueueFamilyIndices queueFamilyIndices_;
 };

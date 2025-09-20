@@ -144,14 +144,14 @@ void DeviceManager::Initialize(VkInstance instance, VkSurfaceKHR surface, bool e
     GetPhysicalDevice(instance, surface, enableScreen);
 
     // --- Queue families
-    QueueFamilyIndices indices = FindQueueFamilies(physicalDevice_, surface, enableScreen);
-    if (!indices.IsComplete(enableScreen)) {
+    queueFamilyIndices_ = FindQueueFamilies(physicalDevice_, surface, enableScreen);
+    if (!queueFamilyIndices_.IsComplete(enableScreen)) {
         logger_.Log(LogLevel::CRITICAL, "Selected GPU does not support required queue families!");
         throw std::runtime_error("Selected GPU does not support required queue families!");
     }
 
-    GetLogicalDevice(indices, enableScreen);
-    GetQueue(indices, enableScreen);
+    GetLogicalDevice(queueFamilyIndices_, enableScreen);
+    GetQueue(queueFamilyIndices_, enableScreen);
 
     VkPhysicalDeviceProperties props;
     vkGetPhysicalDeviceProperties(physicalDevice_, &props);
@@ -215,6 +215,7 @@ void DeviceManager::Shutdown() {
         graphicsQueue_ = VK_NULL_HANDLE;
         computeQueue_  = VK_NULL_HANDLE;
         presentQueue_  = VK_NULL_HANDLE;
+        queueFamilyIndices_;
         logger_.Log(LogLevel::INFO, "Logical device destroyed successfully");
     }
 }
