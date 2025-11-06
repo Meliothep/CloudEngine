@@ -1,7 +1,7 @@
 # CloudRender: Server-Side 3D Engine
 
-CloudEngine is a **3D rendering engine using Vulkan**, designed to run in the cloud.  
-Its main goal is **to minimise redundant server-side work during rendering**, allowing multiple clients to view the scene efficiently, even with minimal material.
+CloudEngine is a **3D rendering engine using Vulkan**, designed to run on a server.  
+Its main goal is **to minimise redundant server-side work during rendering** and stream every client viewport, allowing multiple clients to view and interact with a common scene efficiently even with minimal material.
 
 ---
 
