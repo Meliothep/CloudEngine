@@ -17,8 +17,8 @@ CloudEngine/
 │ │ ├─ CMakeLists.txt
 │ │ └─ src/main.cpp
 │ └─ RendererTest/ # Test utilities
-│ ├─ CMakeLists.txt
-│ └─ src/main.cpp
+│    ├─ CMakeLists.txt
+│    └─ src/main.cpp
 ├─ libs/
 │ └─ VulkanRenderer/ # Rendering library
 │    ├─ CMakeLists.txt
