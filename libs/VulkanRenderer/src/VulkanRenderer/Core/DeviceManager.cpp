@@ -1,32 +1,63 @@
-#include "VulkanRenderer/DeviceManager.hpp"
+#include "VulkanRenderer/Core/DeviceManager.hpp"
 #include <map>
-
 int DeviceManager::RateDeviceSuitability(VkPhysicalDevice device) {
     VkPhysicalDeviceProperties deviceProperties;
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
+    
     int score = 0;
-
-    // Needs to support extentions
+    
+    // Log device info for debugging
+    logger_.Log(LogLevel::DEBUG, std::format("Evaluating device: {}", deviceProperties.deviceName));
+    logger_.Log(LogLevel::DEBUG, std::format("  Device type: {}", static_cast<int>(deviceProperties.deviceType)));
+    logger_.Log(LogLevel::DEBUG, std::format("  API version: {}.{}.{}", 
+        VK_VERSION_MAJOR(deviceProperties.apiVersion),
+        VK_VERSION_MINOR(deviceProperties.apiVersion),
+        VK_VERSION_PATCH(deviceProperties.apiVersion)));
+    
+    // CRITICAL: Heavily penalize software/CPU renderers
+    // Check for "Basic Render Driver" or CPU device type
+    std::string deviceName = deviceProperties.deviceName;
+    if (deviceName.find("Basic Render") != std::string::npos || 
+        deviceName.find("Software") != std::string::npos ||
+        deviceName.find("llvmpipe") != std::string::npos ||
+        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
+        logger_.Log(LogLevel::DEBUG, std::format("Device '{}' is a software renderer - heavily penalized", deviceName));
+        score -= 100000;  // Massive penalty to avoid software renderers
+    }
+    
+    // Needs to support extensions
     if (!CheckDeviceExtensionSupport(device)) {
-        return score; 
+        logger_.Log(LogLevel::WARN, "  Device doesn't support required extensions");
+        return 0;  // Disqualify entirely
     }
-
-    // Discrete GPUs have a significant performance advantage
+    
+    // Prioritize device types
     if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+        score += 10000;
+        logger_.Log(LogLevel::DEBUG, "  Discrete GPU: +10000");
+    } else if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+        score += 5000;
+        logger_.Log(LogLevel::DEBUG, "  Integrated GPU: +5000");
+    } else if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU) {
         score += 1000;
+        logger_.Log(LogLevel::DEBUG, "  Virtual GPU: +1000");
     }
-
+    
     // Maximum possible size of textures affects graphics quality
-    score += deviceProperties.limits.maxImageDimension2D;
-
-    // Application can't function without geometry shaders
+    score += deviceProperties.limits.maxImageDimension2D / 10;  // Scaled down to not overwhelm device type score
+    
+    // Application can't function without geometry shaders (if you really need them)
+    // Note: Many modern apps don't actually need geometry shaders
     if (!deviceFeatures.geometryShader) {
-        return 0;
+        logger_.Log(LogLevel::WARN, "  Device doesn't support geometry shaders");
+        return 0;  // Disqualify if you really need geometry shaders
+        // OR just penalize: score -= 1000;
     }
-
+    
+    logger_.Log(LogLevel::DEBUG, std::format("  Final score: {}", score));
+    
     return score;
 }
 
@@ -155,12 +186,11 @@ void DeviceManager::Initialize(VkInstance instance, VkSurfaceKHR surface, bool e
 
     VkPhysicalDeviceProperties props;
     vkGetPhysicalDeviceProperties(physicalDevice_, &props);
-    logger_.Log(LogLevel::INFO,std::format("Using GPU: {} (Driver version {}.{}.{})", props.deviceName,
-        VK_VERSION_MAJOR(props.driverVersion),
-        VK_VERSION_MINOR(props.driverVersion),
-        VK_VERSION_PATCH(props.driverVersion))  
+    logger_.Log(LogLevel::INFO, std::string("Using GPU: ") + props.deviceName + std::string(" (Driver version ") +
+        std::to_string(VK_VERSION_MAJOR(props.driverVersion)) + std::string(".") +
+        std::to_string(VK_VERSION_MINOR(props.driverVersion)) + std::string(".") +
+        std::to_string(VK_VERSION_PATCH(props.driverVersion)) + std::string(")")
     );
-
 }
 
 QueueFamilyIndices DeviceManager::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface, bool enableScreen) {

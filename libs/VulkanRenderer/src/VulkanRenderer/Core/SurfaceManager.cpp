@@ -1,4 +1,4 @@
-#include "VulkanRenderer/SurfaceManager.hpp"
+#include "VulkanRenderer/Core/SurfaceManager.hpp"
 
 void SurfaceManager::Initialize(VkInstance instance, IWindow* window){
     instance_ = instance;
