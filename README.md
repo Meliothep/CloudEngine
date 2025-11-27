@@ -21,9 +21,9 @@ CloudEngine/
 │ └─ src/main.cpp
 ├─ libs/
 │ └─ VulkanRenderer/ # Rendering library
-│ ├─ CMakeLists.txt
-│ ├─ include/VulkanRenderer/VulkanRenderer.hpp
-│ └─ src/VulkanRenderer.cpp
+│    ├─ CMakeLists.txt
+│    ├─ include/VulkanRenderer/VulkanRenderer.hpp
+│    └─ src/VulkanRenderer.cpp
 ├─ CMakeLists.txt
 ├─ CMakePresets.json
 ├─ .gitignore
