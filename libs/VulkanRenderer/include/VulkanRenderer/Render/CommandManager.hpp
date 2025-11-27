@@ -1,18 +1,18 @@
 #pragma once
 #include "Utils/Logger.hpp"
-#include "DeviceManager.hpp"
+
+#include "VulkanRenderer/Ressource/QueueFamilyIndices.hpp"
 
 #include <vulkan/vulkan.h>
-#include <vector>
 
 class CommandManager {
 public:
-    CommandManager(Logger& logger, DeviceManager& deviceManager) 
-        : logger_(logger), deviceManager_(deviceManager) {}
+    CommandManager(Logger& logger) 
+        : logger_(logger) {}
 
     ~CommandManager() = default;
 
-    void Initialize();
+    void Initialize(VkDevice device, QueueFamilyIndices queueFamilyIndices);
     void Shutdown();
 
     VkCommandPool GetCommandPool() const { return commandPool_; }
@@ -23,7 +23,6 @@ public:
 
 private:
     Logger& logger_;
-    DeviceManager& deviceManager_;
-
+    VkDevice device_{ VK_NULL_HANDLE };
     VkCommandPool commandPool_{ VK_NULL_HANDLE };
 };

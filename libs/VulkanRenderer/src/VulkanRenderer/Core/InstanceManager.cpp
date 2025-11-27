@@ -1,4 +1,4 @@
-#include "VulkanRenderer/InstanceManager.hpp"
+#include "VulkanRenderer/Core/InstanceManager.hpp"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -14,13 +14,12 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
     else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) severity = "WARNING";
     else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) severity = "ERROR";
 
-    logger->Log(LogLevel::DEBUG, std::format("[Vulkan {}]: {}", severity, pCallbackData->pMessage));
+    logger->Log(LogLevel::DEBUG, std::string("[Vulkan ") + severity + std::string("]: ") + (pCallbackData->pMessage ? pCallbackData->pMessage : ""));
 
     return VK_FALSE; // VK_FALSE = don't abort Vulkan call
 }
 
 void InstanceManager::Initialize(bool enableValidationLayers, bool enableScreen){
-    // Init app info 
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -67,12 +66,40 @@ void InstanceManager::Initialize(bool enableValidationLayers, bool enableScreen)
         createInfo.pNext = nullptr;
     }
 
-    if (vkCreateInstance(&createInfo, nullptr, &instance_) != VK_SUCCESS) {
-        logger_.Log(LogLevel::CRITICAL, "Failed to create Vulkan instance!");
+    VkResult res = vkCreateInstance(&createInfo, nullptr, &instance_);
+    if (res != VK_SUCCESS) {
+        logger_.Log(LogLevel::CRITICAL, std::string("Failed to create Vulkan instance, VkResult=") + std::to_string(static_cast<int>(res)));
         throw std::runtime_error("Failed to create Vulkan instance");
     }
 
     logger_.Log(LogLevel::INFO, "Vulkan instance created successfully");
+
+    // If validation layers were requested, create an explicit debug messenger
+    if (enableValidationLayers) {
+        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+        debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                    VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                                    VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        debugCreateInfo.pUserData = &logger_;
+        debugCreateInfo.pfnUserCallback = DebugCallback;
+
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance_, "vkCreateDebugUtilsMessengerEXT");
+        if (func != nullptr) {
+            VkResult r = func(instance_, &debugCreateInfo, nullptr, &debugMessenger_);
+            if (r != VK_SUCCESS) {
+                logger_.Log(LogLevel::EXCEPT, std::string("vkCreateDebugUtilsMessengerEXT returned ") + std::to_string(static_cast<int>(r)));
+            } else {
+                logger_.Log(LogLevel::INFO, "Debug utils messenger created successfully");
+            }
+        } else {
+            logger_.Log(LogLevel::EXCEPT, "vkCreateDebugUtilsMessengerEXT not found; validation messages may be limited");
+        }
+        validationEnabled_ = true;
+    }
 }
 
 void InstanceManager::Shutdown() {
@@ -131,7 +158,7 @@ std::vector<const char*> InstanceManager::GetRequiredExtensions(bool enableValid
         #endif
     }
 
-    std::string msg = std::format("Required extensions for this instance: {}", extensions.size());
+    std::string msg = std::string("Required extensions for this instance: ") + std::to_string(extensions.size());
     logger_.Log(LogLevel::DEBUG, msg);
     return extensions;
 }

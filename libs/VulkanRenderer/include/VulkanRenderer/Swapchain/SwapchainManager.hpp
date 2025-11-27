@@ -1,7 +1,8 @@
 #pragma once
 #include "Utils/Logger.hpp"
-#include "Windows/IWindow.hpp"
-#include "DeviceManager.hpp" 
+#include "Windows/IWindow.hpp" 
+
+#include "VulkanRenderer/Ressource/QueueFamilyIndices.hpp"
 
 #include <vulkan/vulkan.h>
 #include <vector>

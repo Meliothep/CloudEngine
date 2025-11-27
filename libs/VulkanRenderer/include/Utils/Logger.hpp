@@ -5,7 +5,7 @@
 #include <format>
 #include <mutex>
 
-enum class LogLevel { DEBUG = 0, INFO = 1, EXCEPT = 2, CRITICAL = 3 };
+enum class LogLevel { DEBUG = 0, INFO = 1, WARN = 2, EXCEPT = 3, CRITICAL = 4 };
 
 class LoggerStrategy
 {

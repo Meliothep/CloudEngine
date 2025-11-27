@@ -2,8 +2,8 @@ project(VulkanRenderer LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
-file(GLOB SOURCES "src/*/*.cpp")
-file(GLOB HEADERS "include/*/*.h" "include/*/*.hpp")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "include/*.hpp")
 
 add_library(VulkanRenderer ${SOURCES} ${HEADERS})
 

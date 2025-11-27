@@ -27,7 +27,8 @@ public:
         switch (logLevel) {
         case LogLevel::DEBUG:    SetConsoleTextAttribute(hConsole, 0x02); std::cout << "DEBUG "; break;
         case LogLevel::INFO:     SetConsoleTextAttribute(hConsole, 0x01); std::cout << "INFO "; break;
-        case LogLevel::EXCEPT:   SetConsoleTextAttribute(hConsole, 0x06); std::cout << "EXCEPT "; break;
+        case LogLevel::WARN:   SetConsoleTextAttribute(hConsole, 0x06); std::cout << "WARN "; break;
+        case LogLevel::EXCEPT:   SetConsoleTextAttribute(hConsole, 0x04); std::cout << "EXCEPT "; break;
         case LogLevel::CRITICAL: SetConsoleTextAttribute(hConsole, 0x0C); std::cout << "CRITICAL "; break;
         }
         SetConsoleTextAttribute(hConsole, 0x0F);

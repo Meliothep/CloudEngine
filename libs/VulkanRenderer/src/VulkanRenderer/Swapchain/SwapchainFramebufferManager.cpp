@@ -1,4 +1,4 @@
-#include "VulkanRenderer/SwapchainFramebufferManager.hpp"
+#include "VulkanRenderer/Swapchain/SwapchainFramebufferManager.hpp"
 
 void SwapchainFramebufferManager::Initialize(
     VkDevice device,
@@ -21,13 +21,14 @@ void SwapchainFramebufferManager::Initialize(
         framebufferInfo.height = height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &framebuffers_[i]) != VK_SUCCESS) {
-            logger_.Log(LogLevel::CRITICAL, "Failed to create framebuffer!");
+        VkResult res = vkCreateFramebuffer(device, &framebufferInfo, nullptr, &framebuffers_[i]);
+        if (res != VK_SUCCESS) {
+            logger_.Log(LogLevel::CRITICAL, std::string("Failed to create framebuffer! VkResult=") + std::to_string(static_cast<int>(res)));
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
 
-    logger_.Log(LogLevel::INFO, std::format("Created {} framebuffers", framebuffers_.size()));
+    logger_.Log(LogLevel::INFO, std::string("Created ") + std::to_string(framebuffers_.size()) + std::string(" framebuffers"));
 }
 
 void SwapchainFramebufferManager::Shutdown() {

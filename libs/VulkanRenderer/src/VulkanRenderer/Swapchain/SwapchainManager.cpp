@@ -1,4 +1,4 @@
-#include "VulkanRenderer/SwapchainManager.hpp"
+#include "VulkanRenderer/Swapchain/SwapchainManager.hpp"
 
 #include <algorithm>
 
@@ -108,7 +108,8 @@ void SwapchainManager::Initialize(VkPhysicalDevice physicalDevice,  VkDevice dev
     
     VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent_ = ChooseSwapExtent(swapChainSupport.capabilities, window->GetWidth(), window->GetHeight());
+    // Assign to the member `extent_` (avoid shadowing local variable) so GetExtent() returns the value
+    extent_ = ChooseSwapExtent(swapChainSupport.capabilities, window->GetWidth(), window->GetHeight());
 
     imageFormat_ = surfaceFormat.format;
 
