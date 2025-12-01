@@ -11,6 +11,8 @@
 
 #include "Render/RenderPassManager.hpp"
 #include "Render/CommandManager.hpp"
+#include "Render/SyncManager.hpp"
+#include "Render/RenderQueue.hpp"
 
 #include "Pipeline/RenderPipelineManager.hpp"
 
@@ -23,7 +25,7 @@ public:
     void Initialize(IWindow* window = nullptr);
     void Shutdown();
 
-    void RecordSimpleDraw();
+    void DrawFrame();
 private:
     Logger& logger_;
     
@@ -37,4 +39,6 @@ private:
     std::unique_ptr<SwapchainFramebufferManager> swapchainFramebufferManager_ = nullptr;
     std::unique_ptr<RenderPipelineManager> renderPipelineManager_ = nullptr;
     std::unique_ptr<CommandManager> commandManager_ = nullptr;
+    std::unique_ptr<SyncManager> syncManager_ = nullptr;
+    std::unique_ptr<RenderQueue> renderQueue_ = nullptr;
 };

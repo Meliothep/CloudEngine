@@ -30,13 +30,13 @@ void RenderPipelineManager::LoadShaderModules(const std::string& vertShaderPath,
                                               std::vector<char>& outFragCode) {
     try {
         namespace fs = std::filesystem;
-        fs::path exeDir = VulkanRenderer::Utils::GetExecutableDir();
+        fs::path exeDir = GetExecutableDir();
         fs::path shaderDir = exeDir / "shaders";
         fs::path vertPath = shaderDir / (vertShaderPath + ".spv");
         fs::path fragPath = shaderDir / (fragShaderPath + ".spv");
 
-        outVertCode = VulkanRenderer::Utils::ReadFile(vertPath.string());
-        outFragCode = VulkanRenderer::Utils::ReadFile(fragPath.string());
+        outVertCode = ReadFile(vertPath.string());
+        outFragCode = ReadFile(fragPath.string());
     } catch(const std::exception& e) {
         logger_.Log(LogLevel::EXCEPT, std::string("Failed to load shader codes: ") + e.what());
         throw;
@@ -119,7 +119,7 @@ void RenderPipelineManager::CreateGraphicsPipelineFromModules(VkShaderModule ver
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;      
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
