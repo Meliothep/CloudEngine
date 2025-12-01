@@ -54,12 +54,23 @@ void VulkanRenderer::Initialize(IWindow* window) {
     );
 
     commandManager_ =  std::make_unique<CommandManager>(logger_);
-    commandManager_->Initialize(deviceManager_->GetDevice(), deviceManager_->GetQueueFamilyIndices());
+    commandManager_->Initialize(deviceManager_->GetDevice(), deviceManager_->GetQueueFamilyIndices(), swapchainManager_->GetImageViews().size());
+
+    syncManager_ = std::make_unique<SyncManager>(logger_);
+    syncManager_->Initialize(deviceManager_->GetDevice());
+
+    renderQueue_ = std::make_unique<RenderQueue>();
+
 
     logger_.Log(LogLevel::INFO, "Renderer initialized");
 }
 
 void VulkanRenderer::Shutdown(){
+    syncManager_->WaitForFence();
+
+    syncManager_->Shutdown();
+    syncManager_ = nullptr;
+
     commandManager_->Shutdown();
     commandManager_ = nullptr;
 
@@ -89,65 +100,77 @@ void VulkanRenderer::Shutdown(){
     logger_.Log(LogLevel::INFO, "Renderer Shutdown");
 }
 
-void VulkanRenderer::RecordSimpleDraw() {
-    if (!renderPassManager_) {
-        logger_.Log(LogLevel::EXCEPT, "RenderPassManager not initialized (RecordSimpleDraw)");
-        throw std::runtime_error("RenderPassManager not initialized");
-    }
-    if (!swapchainFramebufferManager_) {
-        logger_.Log(LogLevel::EXCEPT, "SwapchainFramebufferManager not initialized (RecordSimpleDraw)");
-        throw std::runtime_error("SwapchainFramebufferManager not initialized");
-    }
-    if (!swapchainManager_) {
-        logger_.Log(LogLevel::EXCEPT, "SwapchainManager not initialized (RecordSimpleDraw)");
-        throw std::runtime_error("SwapchainManager not initialized");
-    }
-    if (!renderPipelineManager_) {
-        logger_.Log(LogLevel::EXCEPT, "RenderPipelineManager not initialized (RecordSimpleDraw)");
-        throw std::runtime_error("RenderPipelineManager not initialized");
-    }
+void VulkanRenderer::DrawFrame() {
+    // Wait for previous frame
+    syncManager_->WaitForFence();
 
-    const auto& framebuffers = swapchainFramebufferManager_->GetFramebuffers();
-    if (framebuffers.empty()) {
-        logger_.Log(LogLevel::EXCEPT, "No framebuffers available (RecordSimpleDraw)");
-        throw std::runtime_error("No framebuffers available");
-    }
+    // Acquire image
+    uint32_t imageIndex;
+    vkAcquireNextImageKHR(deviceManager_->GetDevice(),
+                          swapchainManager_->GetSwapchain(),
+                          UINT64_MAX,
+                          syncManager_->GetImageAvailableSemaphore(),
+                          VK_NULL_HANDLE,
+                          &imageIndex);
 
-    VkFramebuffer framebuffer = framebuffers[0];
-    VkExtent2D extent = swapchainManager_->GetExtent();
-    VkPipeline pipeline = renderPipelineManager_->GetPipeline();
+    // Begin command buffer for this frame
+    VkCommandBuffer cmd = commandManager_->BeginFrame(imageIndex);
+
+    // Begin render pass (main pass)
+    VkRenderPassBeginInfo rpInfo{};
+    rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    rpInfo.renderPass = renderPassManager_->GetRenderPass();
+    rpInfo.framebuffer = swapchainFramebufferManager_->GetFramebuffers()[imageIndex];
+    rpInfo.renderArea.offset = {0,0};
+    rpInfo.renderArea.extent = swapchainManager_->GetExtent();
 
     VkClearValue clearColor{};
-    clearColor.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
-    VkCommandBuffer cmdBuffer = commandManager_->AllocateCommandBuffer();
-    commandManager_->BeginCommandBuffer(cmdBuffer);
+    clearColor.color = {0.1f, 0.1f, 0.1f, 1.0f};
+    rpInfo.clearValueCount = 1;
+    rpInfo.pClearValues = &clearColor;
 
-    // Begin the render pass using the RenderPassManager helper
-    renderPassManager_->BeginRenderPass(cmdBuffer, framebuffer, extent, &clearColor, 1);
+    vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    // Bind the graphics pipeline
-    vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+    // Record all submitted external commands from the RenderQueue
+    for (auto* command : renderQueue_->GetCommands()) {
+        command->Record(cmd);
+    }
 
-    // Set viewport
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(extent.width);
-    viewport.height = static_cast<float>(extent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
+    vkCmdEndRenderPass(cmd);
 
-    // Set scissor
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = extent;
-    vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+    commandManager_->EndFrame(cmd);
 
-    // Issue a simple draw (3 vertices)
-    vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
+    // Submit
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    // End render pass
-    renderPassManager_->EndRenderPass(cmdBuffer);
-    commandManager_->EndCommandBuffer(cmdBuffer);
+    VkSemaphore waitSemaphores[] = { syncManager_->GetImageAvailableSemaphore() };
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmd;
+
+    VkSemaphore signalSemaphores[] = { syncManager_->GetRenderFinishedSemaphore() };
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    // Submit to graphics queue (renderer owns queue handles)
+    vkQueueSubmit(deviceManager_->GetGraphicsQueue(), 1, &submitInfo, syncManager_->GetFence());
+
+    // Present
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+    VkSwapchainKHR swapchains[] = { swapchainManager_->GetSwapchain() };
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapchains;
+    presentInfo.pImageIndices = &imageIndex;
+    vkQueuePresentKHR(deviceManager_->GetPresentQueue(), &presentInfo);
+
+    // Clear the render queue for next frame (ownership of commands is external)
+    renderQueue_->Clear();
 }

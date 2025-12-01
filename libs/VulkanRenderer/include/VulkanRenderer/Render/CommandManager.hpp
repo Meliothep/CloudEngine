@@ -7,22 +7,22 @@
 
 class CommandManager {
 public:
-    CommandManager(Logger& logger) 
-        : logger_(logger) {}
+    CommandManager(Logger& logger) : logger_(logger) {}
 
-    ~CommandManager() = default;
-
-    void Initialize(VkDevice device, QueueFamilyIndices queueFamilyIndices);
+    void Initialize(VkDevice device, QueueFamilyIndices indices, uint32_t swapchainImageCount);
     void Shutdown();
 
-    VkCommandPool GetCommandPool() const { return commandPool_; }
-    VkCommandBuffer AllocateCommandBuffer(bool primary = true);
+    VkCommandBuffer BeginFrame(uint32_t imageIndex);
+    void EndFrame(VkCommandBuffer cmd);
 
-    void BeginCommandBuffer(VkCommandBuffer cmdBuffer, VkCommandBufferUsageFlags usage = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-    void EndCommandBuffer(VkCommandBuffer cmdBuffer);
+    VkCommandBuffer AllocateCommandBuffer(bool primary = true);
+    void BeginCommandBuffer(VkCommandBuffer cmd, VkCommandBufferUsageFlags usage = 0);
+    void EndCommandBuffer(VkCommandBuffer cmd);
 
 private:
     Logger& logger_;
-    VkDevice device_{ VK_NULL_HANDLE };
-    VkCommandPool commandPool_{ VK_NULL_HANDLE };
+    VkDevice device_ = VK_NULL_HANDLE;
+    VkCommandPool commandPool_ = VK_NULL_HANDLE;
+
+    std::vector<VkCommandBuffer> commandBuffers_;
 };

@@ -10,8 +10,6 @@
 #  include <limits.h>
 #endif
 
-namespace VulkanRenderer::Utils {
-
 std::filesystem::path GetExecutableDir() {
     namespace fs = std::filesystem;
 #ifdef _WIN32
@@ -50,4 +48,3 @@ std::vector<char> ReadFile(const std::string& filename) {
     return buffer;
 }
 
-} // namespace VulkanRenderer::Utils

@@ -34,27 +34,64 @@ void CommandManager::EndCommandBuffer(VkCommandBuffer cmdBuffer){
         throw std::runtime_error("Failed to record command buffer!");
     }
 }
-
-void CommandManager::Initialize(VkDevice device, QueueFamilyIndices queueFamilyIndices){
+void CommandManager::Initialize(VkDevice device, QueueFamilyIndices indices, uint32_t swapchainImageCount) {
     device_ = device;
 
+    // Create pool
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    poolInfo.queueFamilyIndex = indices.graphicsFamily.value();
 
     if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool_) != VK_SUCCESS) {
-        logger_.Log(LogLevel::EXCEPT, "Failed to create command pool!");
-        throw std::runtime_error("failed to create command pool!");
+        throw std::runtime_error("Failed to create command pool!");
     }
 
-    logger_.Log(LogLevel::INFO, "Command pool created successfully");
+    // Allocate one command buffer per swapchain framebuffer
+    commandBuffers_.resize(swapchainImageCount);
+
+    VkCommandBufferAllocateInfo alloc{};
+    alloc.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc.commandPool = commandPool_;
+    alloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc.commandBufferCount = swapchainImageCount;
+
+    if (vkAllocateCommandBuffers(device, &alloc, commandBuffers_.data()) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to allocate per-frame command buffers");
+    }
+
+    logger_.Log(LogLevel::INFO, "CommandManager initialized");
 }
 
-void CommandManager::Shutdown(){
-     if (commandPool_ != VK_NULL_HANDLE) {
+VkCommandBuffer CommandManager::BeginFrame(uint32_t imageIndex) {
+    VkCommandBuffer cmd = commandBuffers_[imageIndex];
+
+    vkResetCommandBuffer(cmd, 0);
+
+    VkCommandBufferBeginInfo begin{};
+    begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    if (vkBeginCommandBuffer(cmd, &begin) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to begin command buffer");
+    }
+
+    return cmd;
+}
+
+void CommandManager::EndFrame(VkCommandBuffer cmd) {
+    if (vkEndCommandBuffer(cmd) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to record command buffer");
+    }
+}
+
+
+void CommandManager::Shutdown() {
+    if (commandPool_ != VK_NULL_HANDLE) {
         vkDestroyCommandPool(device_, commandPool_, nullptr);
         commandPool_ = VK_NULL_HANDLE;
     }
-    logger_.Log(LogLevel::INFO, "Command pool destroyed successfully");
+    commandBuffers_.clear();
+
+    logger_.Log(LogLevel::INFO, "CommandManager destroyed");
 }
