@@ -1,6 +1,7 @@
 #pragma once
 #include "Utils/Logger.hpp"
 #include "Buffer.hpp"
+#include "Vertex.hpp"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -11,11 +12,6 @@ public:
     Mesh(Logger& logger) : logger_(logger) {}
     ~Mesh() = default;
 
-    struct Vertex {
-        float position[3];
-        float normal[3];
-        float uv[2];
-    };
 
     void Initialize(VkDevice device,
                     VkPhysicalDevice physicalDevice,

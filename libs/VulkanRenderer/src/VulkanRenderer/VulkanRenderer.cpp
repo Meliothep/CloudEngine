@@ -61,6 +61,22 @@ void VulkanRenderer::Initialize(IWindow* window) {
 
     renderQueue_ = std::make_unique<RenderQueue>();
 
+    // Create a simple triangle mesh to draw
+    mesh_ = std::make_unique<Mesh>(logger_);
+    std::vector<Vertex> vertices{
+        Vertex{{0.0f, -0.5f, 0.0f}, {0.0f,0.0f,1.0f}, {0.5f, 1.0f}}, // TOP
+        Vertex{{-0.5f, 0.5f, 0.0f}, {0.0f,1.0f,0.0f}, {0.0f, 0.0f}}, // RIGHT
+        Vertex{{0.5f, 0.5f, 0.0f},  {1.0f,0.0f,0.0f}, {1.0f, 0.0f}}, // LEFT
+    };
+
+    mesh_->Initialize(
+        deviceManager_->GetDevice(),
+        deviceManager_->GetPhysicalDevice(),
+        deviceManager_->GetGraphicsQueue(),
+        commandManager_->GetCommandPool(),
+        vertices
+    );
+
 
     logger_.Log(LogLevel::INFO, "Renderer initialized");
 }
@@ -76,6 +92,9 @@ void VulkanRenderer::Shutdown(){
 
     renderPipelineManager_->Shutdown();
     renderPipelineManager_ = nullptr;
+
+    mesh_->Shutdown();
+    mesh_.reset();
 
     swapchainFramebufferManager_->Shutdown();
     swapchainFramebufferManager_ = nullptr; 
@@ -113,10 +132,8 @@ void VulkanRenderer::DrawFrame() {
                           VK_NULL_HANDLE,
                           &imageIndex);
 
-    // Begin command buffer for this frame
     VkCommandBuffer cmd = commandManager_->BeginFrame(imageIndex);
 
-    // Begin render pass (main pass)
     VkRenderPassBeginInfo rpInfo{};
     rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     rpInfo.renderPass = renderPassManager_->GetRenderPass();
@@ -125,13 +142,36 @@ void VulkanRenderer::DrawFrame() {
     rpInfo.renderArea.extent = swapchainManager_->GetExtent();
 
     VkClearValue clearColor{};
-    clearColor.color = {0.1f, 0.1f, 0.1f, 1.0f};
+    clearColor.color = {0.f, 0.f, 0.f, 1.0f};
     rpInfo.clearValueCount = 1;
     rpInfo.pClearValues = &clearColor;
 
     vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    // Record all submitted external commands from the RenderQueue
+    // Bind our graphics pipeline and draw the triangle mesh if present
+    if (renderPipelineManager_ && mesh_) {
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipelineManager_->GetPipeline());
+        // Provide dynamic viewport and scissor if the pipeline expects them
+        VkExtent2D extent = swapchainManager_->GetExtent();
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(extent.width);
+        viewport.height = static_cast<float>(extent.height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent = extent;
+        vkCmdSetScissor(cmd, 0, 1, &scissor);
+        
+        mesh_->Bind(cmd);
+
+        vkCmdDraw(cmd, 3, 1, 0, 0);
+    }
+
     for (auto* command : renderQueue_->GetCommands()) {
         command->Record(cmd);
     }

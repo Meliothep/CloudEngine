@@ -15,6 +15,7 @@
 #include "Render/RenderQueue.hpp"
 
 #include "Pipeline/RenderPipelineManager.hpp"
+#include "VulkanRenderer/Ressource/Mesh.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -41,4 +42,5 @@ private:
     std::unique_ptr<CommandManager> commandManager_ = nullptr;
     std::unique_ptr<SyncManager> syncManager_ = nullptr;
     std::unique_ptr<RenderQueue> renderQueue_ = nullptr;
+    std::unique_ptr<Mesh> mesh_ = nullptr;
 };
