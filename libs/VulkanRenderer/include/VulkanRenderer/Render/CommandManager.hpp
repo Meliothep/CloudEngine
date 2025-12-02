@@ -18,6 +18,7 @@ public:
     VkCommandBuffer AllocateCommandBuffer(bool primary = true);
     void BeginCommandBuffer(VkCommandBuffer cmd, VkCommandBufferUsageFlags usage = 0);
     void EndCommandBuffer(VkCommandBuffer cmd);
+    VkCommandPool GetCommandPool() const { return commandPool_; }
 
 private:
     Logger& logger_;
