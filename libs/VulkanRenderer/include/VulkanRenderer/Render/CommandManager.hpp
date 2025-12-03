@@ -1,9 +1,7 @@
 #pragma once
-#include "Utils/Logger.hpp"
+#include "pch.h"
 
 #include "VulkanRenderer/Ressource/QueueFamilyIndices.hpp"
-
-#include <vulkan/vulkan.h>
 
 class CommandManager {
 public:

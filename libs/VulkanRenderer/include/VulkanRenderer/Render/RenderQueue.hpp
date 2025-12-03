@@ -1,9 +1,7 @@
 #pragma once
+#include "pch.h"
 
 #include "VulkanRenderer/Render/IRenderCommand.hpp"
-
-#include <vector>
-#include <memory>
 
 class RenderQueue {
 public:

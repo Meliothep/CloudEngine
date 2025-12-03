@@ -1,10 +1,5 @@
 #pragma once
-#include "Utils/Logger.hpp"
-
-#include <string>
-#include <vector>
-
-#include <vulkan/vulkan.h>
+#include "pch.h"
 
 class RenderPipelineManager {
 public:

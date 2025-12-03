@@ -11,6 +11,8 @@ target_include_directories(VulkanRenderer
     PUBLIC include
 )
 
+target_precompile_headers(VulkanRenderer PRIVATE "include/pch.h")
+
 target_link_libraries(VulkanRenderer PUBLIC 
     Vulkan::Vulkan
 )

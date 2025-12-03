@@ -1,11 +1,8 @@
 #pragma once
-#include "Utils/Logger.hpp"
+#include "pch.h"
+
 #include "Buffer.hpp"
 #include "Vertex.hpp"
-
-#include <vulkan/vulkan.h>
-#include <vector>
-#include <cstdint>
 
 class Mesh {
 public:

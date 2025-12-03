@@ -1,11 +1,8 @@
 #pragma once
-#include "Utils/Logger.hpp"
+#include "pch.h"
+
 #include "Windows/IWindow.hpp" 
-
 #include "VulkanRenderer/Ressource/QueueFamilyIndices.hpp"
-
-#include <vulkan/vulkan.h>
-#include <vector>
 
 struct SwapchainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;

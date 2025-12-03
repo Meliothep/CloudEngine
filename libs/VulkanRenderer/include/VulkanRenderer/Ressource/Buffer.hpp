@@ -1,7 +1,5 @@
 #pragma once
-
-#include <vulkan/vulkan.h>
-#include <cstdint>
+#include "pch.h"
 
 class Buffer {
 public:

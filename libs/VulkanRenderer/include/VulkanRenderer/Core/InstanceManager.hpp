@@ -1,7 +1,5 @@
 #pragma once
-#include "Utils/Logger.hpp"
-
-#include <vulkan/vulkan.h>
+#include "pch.h"
 
 #ifdef _WIN32
     #include <Windows.h>
@@ -11,9 +9,6 @@
 #elif defined(__APPLE__)
     #include <vulkan/vulkan_macos.h>
 #endif
-
-#include <vector>
-#include <string>
 
 class Logger;
 

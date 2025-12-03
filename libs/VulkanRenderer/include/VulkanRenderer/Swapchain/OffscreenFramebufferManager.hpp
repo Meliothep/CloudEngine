@@ -1,8 +1,5 @@
 #pragma once
-#include "Utils/Logger.hpp"
-
-#include <vulkan/vulkan.h>
-#include <vector>
+#include "pch.h"
 
 class OffscreenFramebufferManager {
 public:

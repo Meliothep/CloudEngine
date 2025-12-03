@@ -1,7 +1,5 @@
 #pragma once
-#include "Utils/Logger.hpp"
-
-#include <vulkan/vulkan.h>
+#include "pch.h"
 
 class SyncManager {
 public:

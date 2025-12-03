@@ -1,5 +1,6 @@
 #pragma once
-#include "Utils/Logger.hpp"
+#include "pch.h"
+
 #include "Windows/IWindow.hpp"
 
 #include "Core/InstanceManager.hpp"
@@ -16,8 +17,6 @@
 
 #include "Pipeline/RenderPipelineManager.hpp"
 #include "VulkanRenderer/Ressource/Mesh.hpp"
-
-#include <vulkan/vulkan.h>
 
 class VulkanRenderer{
 public:

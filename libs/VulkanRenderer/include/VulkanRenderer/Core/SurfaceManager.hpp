@@ -1,8 +1,7 @@
 #pragma once
-#include "Utils/Logger.hpp"
-#include "Windows/IWindow.hpp"
+#include "pch.h"
 
-#include <vulkan/vulkan.h>
+#include "Windows/IWindow.hpp"
 
 #ifdef _WIN32
     #include <Windows.h>

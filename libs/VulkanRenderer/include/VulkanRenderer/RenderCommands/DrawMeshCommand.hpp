@@ -1,8 +1,7 @@
 #pragma once
-#include "../Render/IRenderCommand.hpp"
+#include "pch.h"
 
-#include <vulkan/vulkan.h>
-#include <cstddef>
+#include "../Render/IRenderCommand.hpp"
 
 class Mesh;
 class Material;
