@@ -8,7 +8,7 @@
     #include <Windows.h>
     #include <vulkan/vulkan_win32.h>
 #elif defined(__linux__)
-    #include <vulkan/vulkan_xcb.h> // or vulkan_xlib.h / vulkan_wayland.h
+    #include <vulkan/vulkan_xcb.h> 
 #elif defined(__APPLE__)
     #include <vulkan/vulkan_macos.h>
 #endif
