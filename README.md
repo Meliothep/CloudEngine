@@ -5,7 +5,7 @@ Its main goal is **to minimise redundant server-side work during rendering** and
 
 ---
 
-## 🎨 Project structure
+## Project structure
 
 ```
 CloudEngine/
@@ -33,7 +33,7 @@ CloudEngine/
 
 ---
 
-## ⚙️ Requirements
+## Requirements
 
 - **Vulkan SDK** installed locally.
 - **vcpkg** for dependency management.
@@ -43,13 +43,14 @@ CloudEngine/
 
 ---
 
-## 🚀 Building
+## Building
 
-1. **Install dependencies via vcpkg:**
-
+**Install dependencies via vcpkg:**
 ```powershell
 cmake --preset=vcpkg
-
+```
+**Build:**
+```powershell
 cmake --build build --target Client
 cmake --build build --target Server
 cmake --build build --target VulkanRenderer
