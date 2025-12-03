@@ -4,17 +4,13 @@
 #include <locale>
 #include <iostream>
 
-Win32Window::Win32Window(int width, int height, const char* title)
+Win32Window::Win32Window(int width, int height, LPCWSTR title)
     : m_hwnd(nullptr), m_hinstance(GetModuleHandle(nullptr)), 
       m_shouldClose(false), m_width(width), m_height(height) {
     
     if (!RegisterWindowClass()) {
         throw std::runtime_error("Failed to register window class");
     }
-
-    // Convert title to wide string
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    std::wstring wTitle = converter.from_bytes(title);
 
     // Calculate window size including borders
     RECT windowRect = { 0, 0, width, height };
@@ -27,7 +23,7 @@ Win32Window::Win32Window(int width, int height, const char* title)
     m_hwnd = CreateWindowExW(
         0,                              // Optional window styles
         m_className.c_str(),            // Window class
-        wTitle.c_str(),                 // Window text
+        title,                          // Window text
         WS_OVERLAPPEDWINDOW,            // Window style
         CW_USEDEFAULT, CW_USEDEFAULT,   // Size and position
         windowWidth, windowHeight,      // Width and height
@@ -108,7 +104,7 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
         }
     }
 
-    return DefWindowProc(hwnd, msg, wParam, lParam);
+    return DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 
 bool Win32Window::RegisterWindowClass() {
@@ -124,6 +120,7 @@ bool Win32Window::RegisterWindowClass() {
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wc.lpszClassName = m_className.c_str();
+    wc.lpszMenuName = nullptr;
 
     return RegisterClassExW(&wc) != 0;
 }

@@ -7,7 +7,7 @@
 class Win32Window : public IWindow {
 
 public:
-    Win32Window(int width, int height, const char* title);
+    Win32Window(int width, int height, LPCWSTR title);
     ~Win32Window() override;
 
     // IWindow interface
