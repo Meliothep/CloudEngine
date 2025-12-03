@@ -9,7 +9,7 @@ int main() {
 
     logger->AddLoggerStrat(std::make_unique<Win32ConsoleStrategy>(LogLevel::DEBUG));
 
-    IWindow* window = new Win32Window(500, 500, "TestWindow"); 
+    IWindow* window = new Win32Window(500, 500, L"TestWindow"); 
     //IWindow* window = nullptr;    
 
     VulkanRenderer renderer(*logger);
