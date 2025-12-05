@@ -39,24 +39,25 @@ void RenderPipelineManager::LoadShaderModules(const std::string& vertShaderPath,
 
         outVertCode = ReadFile(vertPath.string());
         outFragCode = ReadFile(fragPath.string());
+
+        logger_.Log(LogLevel::DEBUG, "Creating module for " + vertShaderPath);
+        CreateShaderModule(outVertCode, outVertModule);
+
+        logger_.Log(LogLevel::DEBUG, "Creating module for " + fragShaderPath);
+        CreateShaderModule(outFragCode, outFragModule);
     } catch(const std::exception& e) {
         logger_.Log(LogLevel::EXCEPT, std::string("Failed to load shader codes: ") + e.what());
         throw;
     }
-
-    logger_.Log(LogLevel::DEBUG, "Shaders codes loaded successfully");
-
-    CreateShaderModule(outVertCode, outVertModule);
-    CreateShaderModule(outFragCode, outFragModule);
 }
 
 void RenderPipelineManager::CreateGraphicsPipelineLayout() {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 0; // Optional
-    pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
-    pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
-    pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+    pipelineLayoutInfo.setLayoutCount = 0;
+    pipelineLayoutInfo.pSetLayouts = nullptr;
+    pipelineLayoutInfo.pushConstantRangeCount = 0;
+    pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
     if (vkCreatePipelineLayout(device_, &pipelineLayoutInfo, nullptr, &pipelineLayout_) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");

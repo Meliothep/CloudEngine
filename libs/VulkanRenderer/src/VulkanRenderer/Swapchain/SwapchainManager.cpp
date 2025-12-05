@@ -92,7 +92,6 @@ void SwapchainManager::CreateImageViews() {
     logger_.Log(LogLevel::INFO, "Swapchain image views created successfully");
 }
 
-
 void SwapchainManager::Initialize(VkPhysicalDevice physicalDevice,  VkDevice device,  VkSurfaceKHR surface,
     QueueFamilyIndices indices, IWindow* window){
 

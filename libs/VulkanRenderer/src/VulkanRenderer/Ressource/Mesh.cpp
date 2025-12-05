@@ -1,6 +1,5 @@
 #include "VulkanRenderer/Ressource/Mesh.hpp"
 
-
 void Mesh::Initialize(VkDevice device,
                       VkPhysicalDevice physicalDevice,
                       VkQueue graphicsQueue,

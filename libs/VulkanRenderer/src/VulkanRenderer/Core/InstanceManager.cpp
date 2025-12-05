@@ -73,33 +73,6 @@ void InstanceManager::Initialize(bool enableValidationLayers, bool enableScreen)
     }
 
     logger_.Log(LogLevel::INFO, "Vulkan instance created successfully");
-
-    // If validation layers were requested, create an explicit debug messenger
-    if (enableValidationLayers) {
-        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-        debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                                    VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                                    VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-        debugCreateInfo.pUserData = &logger_;
-        debugCreateInfo.pfnUserCallback = DebugCallback;
-
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance_, "vkCreateDebugUtilsMessengerEXT");
-        if (func != nullptr) {
-            VkResult r = func(instance_, &debugCreateInfo, nullptr, &debugMessenger_);
-            if (r != VK_SUCCESS) {
-                logger_.Log(LogLevel::EXCEPT, std::string("vkCreateDebugUtilsMessengerEXT returned ") + std::to_string(static_cast<int>(r)));
-            } else {
-                logger_.Log(LogLevel::INFO, "Debug utils messenger created successfully");
-            }
-        } else {
-            logger_.Log(LogLevel::EXCEPT, "vkCreateDebugUtilsMessengerEXT not found; validation messages may be limited");
-        }
-        validationEnabled_ = true;
-    }
 }
 
 void InstanceManager::Shutdown() {

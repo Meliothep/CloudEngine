@@ -15,22 +15,18 @@ int DeviceManager::RateDeviceSuitability(VkPhysicalDevice device) {
         VK_VERSION_MAJOR(deviceProperties.apiVersion),
         VK_VERSION_MINOR(deviceProperties.apiVersion),
         VK_VERSION_PATCH(deviceProperties.apiVersion)));
-    
-    // CRITICAL: Heavily penalize software/CPU renderers
-    // Check for "Basic Render Driver" or CPU device type
-    std::string deviceName = deviceProperties.deviceName;
-    if (deviceName.find("Basic Render") != std::string::npos || 
-        deviceName.find("Software") != std::string::npos ||
-        deviceName.find("llvmpipe") != std::string::npos ||
-        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
-        logger_.Log(LogLevel::DEBUG, std::format("Device '{}' is a software renderer - heavily penalized", deviceName));
-        score -= 100000;  // Massive penalty to avoid software renderers
-    }
-    
+        
     // Needs to support extensions
     if (!CheckDeviceExtensionSupport(device)) {
         logger_.Log(LogLevel::WARN, "  Device doesn't support required extensions");
         return 0;  // Disqualify entirely
+    }
+
+    // CRITICAL: Heavily penalize software/CPU renderers
+    std::string deviceName = deviceProperties.deviceName;
+    if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
+        logger_.Log(LogLevel::DEBUG, std::format("Device '{}' is a software renderer / CPU - heavily penalized", deviceName));
+        score -= 100000; 
     }
     
     // Prioritize device types
@@ -44,16 +40,14 @@ int DeviceManager::RateDeviceSuitability(VkPhysicalDevice device) {
         score += 1000;
         logger_.Log(LogLevel::DEBUG, "  Virtual GPU: +1000");
     }
-    
+
     // Maximum possible size of textures affects graphics quality
-    score += deviceProperties.limits.maxImageDimension2D / 10;  // Scaled down to not overwhelm device type score
+    score += deviceProperties.limits.maxImageDimension2D / 10;
     
-    // Application can't function without geometry shaders (if you really need them)
-    // Note: Many modern apps don't actually need geometry shaders
+    // Geometry shader support
     if (!deviceFeatures.geometryShader) {
         logger_.Log(LogLevel::WARN, "  Device doesn't support geometry shaders");
-        return 0;  // Disqualify if you really need geometry shaders
-        // OR just penalize: score -= 1000;
+        return 0; 
     }
     
     logger_.Log(LogLevel::DEBUG, std::format("  Final score: {}", score));
@@ -245,7 +239,6 @@ void DeviceManager::Shutdown() {
         graphicsQueue_ = VK_NULL_HANDLE;
         computeQueue_  = VK_NULL_HANDLE;
         presentQueue_  = VK_NULL_HANDLE;
-        queueFamilyIndices_;
         logger_.Log(LogLevel::INFO, "Logical device destroyed successfully");
     }
 }
