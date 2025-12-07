@@ -57,7 +57,7 @@ void VulkanRenderer::Initialize(IWindow* window) {
     commandManager_->Initialize(deviceManager_->GetDevice(), deviceManager_->GetQueueFamilyIndices(), swapchainManager_->GetImageViews().size());
 
     syncManager_ = std::make_unique<SyncManager>(logger_);
-    syncManager_->Initialize(deviceManager_->GetDevice());
+    syncManager_->Initialize(deviceManager_->GetDevice(), swapchainManager_->GetImageViews().size());
 
     renderQueue_ = std::make_unique<RenderQueue>();
 
@@ -82,6 +82,8 @@ void VulkanRenderer::Initialize(IWindow* window) {
 }
 
 void VulkanRenderer::Shutdown(){
+    vkDeviceWaitIdle(deviceManager_->GetDevice());
+
     syncManager_->WaitForFence();
 
     syncManager_->Shutdown();
@@ -122,7 +124,8 @@ void VulkanRenderer::Shutdown(){
 void VulkanRenderer::DrawFrame() {
     // Wait for previous frame
     syncManager_->WaitForFence();
-
+    syncManager_->AdvanceFrame();
+    
     // Acquire image
     uint32_t imageIndex;
     vkAcquireNextImageKHR(deviceManager_->GetDevice(),
