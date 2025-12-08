@@ -50,7 +50,7 @@ endif()
 add_executable(RendererTest src/main.cpp)
 
 target_link_libraries(RendererTest
-        PRIVATE VulkanRenderer
+        PRIVATE VkCore
 )
 
 # Ensure shaders are compiled before the executable is linked/built

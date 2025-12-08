@@ -1,8 +1,8 @@
 #include <Utils/Logger.hpp>
 #include <Utils/Win32ConsoleStrategy.hpp>
-#include <Windows/Win32Window.hpp>
+#include <Win32/Win32Window.hpp>
 
-#include <VulkanRenderer/VulkanRenderer.hpp>
+#include <VulkanRenderer.hpp>
 
 int main() {
     auto logger = std::make_unique<Logger>();
@@ -15,6 +15,7 @@ int main() {
     VulkanRenderer renderer(*logger);
     renderer.Initialize(window);
     while(window->ProcessMessages()){
+        renderer.HandleResize();
         renderer.DrawFrame();
     }
 

@@ -13,7 +13,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 # Inclure les sous-projets
-add_subdirectory(libs/VulkanRenderer)
+add_subdirectory(libs/VkCore)
 add_subdirectory(apps/RendererTest)
 add_subdirectory(apps/Server)
 add_subdirectory(apps/Client)
