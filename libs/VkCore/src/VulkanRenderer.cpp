@@ -29,12 +29,19 @@ void VulkanRenderer::Initialize(IWindow* window) {
             swapchain_->GetImageFormat()
         );
         
-        renderPipeline_ = std::make_unique<RenderPipeline>(logger_);
-        renderPipeline_->Initialize(
+        vertShaderModule_ = std::make_unique<ShaderModule>(logger_);
+        vertShaderModule_->Initialize(device_->GetDevice(), "triangle.vert");
+        
+        fragShaderModule_  = std::make_unique<ShaderModule>(logger_); 
+        fragShaderModule_->Initialize(device_->GetDevice(), "triangle.frag");
+
+
+        pipeline_ = std::make_unique<Pipeline>(logger_);
+        pipeline_->Initialize(
             device_->GetDevice(),
             renderPass_->GetRenderPass(),
-            "triangle.vert",
-            "triangle.frag",
+            vertShaderModule_->GetModule(),
+            fragShaderModule_->GetModule(),
             swapchain_->GetExtent()
         );
 
@@ -67,8 +74,8 @@ void VulkanRenderer::Initialize(IWindow* window) {
     mesh_ = std::make_unique<Mesh>(logger_);
     std::vector<Vertex> vertices{
         Vertex{{0.0f, -0.5f, 0.0f}, {0.0f,0.0f,1.0f}, {0.5f, 1.0f}}, // TOP
-        Vertex{{-0.5f, 0.5f, 0.0f}, {0.0f,1.0f,0.0f}, {0.0f, 0.0f}}, // RIGHT
-        Vertex{{0.5f, 0.5f, 0.0f},  {1.0f,0.0f,0.0f}, {1.0f, 0.0f}}, // LEFT
+        Vertex{{-0.5f, 0.5f, 1.0f}, {0.0f,1.0f,0.0f}, {0.0f, 0.0f}}, // RIGHT
+        Vertex{{0.5f, 0.5f, 1.0f},  {1.0f,0.0f,0.0f}, {1.0f, 0.0f}}, // LEFT
     };
 
     mesh_->Initialize(
@@ -94,8 +101,8 @@ void VulkanRenderer::Shutdown(){
     command_->Shutdown();
     command_ = nullptr;
 
-    renderPipeline_->Shutdown();
-    renderPipeline_ = nullptr;
+    pipeline_->Shutdown();
+    pipeline_ = nullptr;
 
     mesh_->Shutdown();
     mesh_.reset();
@@ -181,8 +188,8 @@ void VulkanRenderer::DrawFrame() {
     vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     // Bind our graphics pipeline and draw the triangle mesh if present
-    if (renderPipeline_ && mesh_) {
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline_->GetPipeline());
+    if (pipeline_ && mesh_) {
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetPipeline());
         // Provide dynamic viewport and scissor if the pipeline expects them
         VkExtent2D extent = swapchain_->GetExtent();
         VkViewport viewport{};

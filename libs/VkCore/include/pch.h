@@ -7,6 +7,7 @@
 
 #include <optional>
 
+#include <array>
 #include <vector>
 #include <set>
 

@@ -15,7 +15,7 @@ int main() {
     VulkanRenderer renderer(*logger);
     renderer.Initialize(window);
     while(window->ProcessMessages()){
-        renderer.HandleResize();
+        // renderer.HandleResize();
         renderer.DrawFrame();
     }
 

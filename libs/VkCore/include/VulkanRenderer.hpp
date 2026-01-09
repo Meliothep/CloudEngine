@@ -12,7 +12,8 @@
 #include "Swapchain/SwapchainFramebuffer.hpp"
 
 #include "Pipeline/RenderPass.hpp"
-#include "Pipeline/RenderPipeline.hpp"
+#include "Pipeline/ShaderModule.hpp"
+#include "Pipeline/Pipeline.hpp"
 
 #include "Rendering/RenderQueue.hpp"
 
@@ -38,7 +39,9 @@ private:
     std::unique_ptr<Swapchain> swapchain_ = nullptr;
     std::unique_ptr<RenderPass> renderPass_ = nullptr;
     std::unique_ptr<SwapchainFramebuffer> swapchainFramebuffer_ = nullptr;
-    std::unique_ptr<RenderPipeline> renderPipeline_ = nullptr;
+    std::unique_ptr<ShaderModule> vertShaderModule_ = nullptr;
+    std::unique_ptr<ShaderModule> fragShaderModule_ = nullptr; 
+    std::unique_ptr<Pipeline> pipeline_ = nullptr;
     std::unique_ptr<Command> command_ = nullptr;
     std::unique_ptr<Sync> sync_ = nullptr;
     std::unique_ptr<RenderQueue> renderQueue_ = nullptr;

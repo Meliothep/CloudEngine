@@ -1,15 +1,15 @@
 #pragma once
 #include "pch.h"
 
-class RenderPipeline {
+class Pipeline {
 public:
-    RenderPipeline(Logger& logger) : logger_(logger) {}
-    ~RenderPipeline() = default;
+    Pipeline(Logger& logger) : logger_(logger) {}
+    ~Pipeline() = default;
 
     void Initialize(VkDevice device,
                     VkRenderPass renderPass,
-                    const std::string& vertShaderPath,
-                    const std::string& fragShaderPath,
+                    VkShaderModule vertShaderModule,
+                    VkShaderModule fragShaderModule,
                     VkExtent2D extent);
 
     void Shutdown();
@@ -23,15 +23,6 @@ private:
     VkDevice device_{VK_NULL_HANDLE};
     VkPipelineLayout pipelineLayout_{VK_NULL_HANDLE};
     VkPipeline graphicsPipeline_{VK_NULL_HANDLE};
-
-    void CreateShaderModule(const std::vector<char>& code, VkShaderModule& outModule);
-
-    void LoadShaderModules(const std::string& vertShaderPath,
-                           const std::string& fragShaderPath,
-                           VkShaderModule& outVertModule,
-                           VkShaderModule& outFragModule,
-                           std::vector<char>& outVertCode,
-                           std::vector<char>& outFragCode);
     
     void CreateGraphicsPipelineLayout();
     
