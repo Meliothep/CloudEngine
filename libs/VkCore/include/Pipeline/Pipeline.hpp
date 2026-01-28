@@ -1,6 +1,11 @@
 #pragma once
 #include "pch.h"
 
+struct PipelineShaderStage {
+    VkShaderModule module;
+    VkShaderStageFlagBits stage;
+};
+
 class Pipeline {
 public:
     Pipeline(Logger& logger) : logger_(logger) {}
@@ -8,8 +13,8 @@ public:
 
     void Initialize(VkDevice device,
                     VkRenderPass renderPass,
-                    VkShaderModule vertShaderModule,
-                    VkShaderModule fragShaderModule,
+                    const PipelineShaderStage& vertStage,
+                    const PipelineShaderStage& fragStage,
                     VkExtent2D extent);
 
     void Shutdown();
@@ -26,8 +31,8 @@ private:
     
     void CreateGraphicsPipelineLayout();
     
-    void CreateGraphicsPipelineFromModules(VkShaderModule vertShaderModule,
-                                           VkShaderModule fragShaderModule,
+    void CreateGraphicsPipelineFromModules(const PipelineShaderStage& vertStage,
+                                           const PipelineShaderStage& fragStage,
                                            VkRenderPass renderPass,
                                            VkExtent2D extent);
 };

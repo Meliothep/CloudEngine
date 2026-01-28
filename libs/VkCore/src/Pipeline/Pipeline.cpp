@@ -19,21 +19,21 @@ void Pipeline::CreateGraphicsPipelineLayout() {
     }
 }
 
-void Pipeline::CreateGraphicsPipelineFromModules(VkShaderModule vertShaderModule,
-                                                 VkShaderModule fragShaderModule,
+void Pipeline::CreateGraphicsPipelineFromModules(const PipelineShaderStage& vertStage,
+                                                 const PipelineShaderStage& fragStage,
                                                  VkRenderPass renderPass,
                                                  VkExtent2D extent) {
     // --- Shader stages -----------------------------------------------------
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vertShaderModule;
+    vertShaderStageInfo.stage  = vertStage.stage;
+    vertShaderStageInfo.module = vertStage.module;
     vertShaderStageInfo.pName  = "main";
 
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
     fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = fragShaderModule;
+    fragShaderStageInfo.stage  = fragStage.stage;
+    fragShaderStageInfo.module = fragStage.module;
     fragShaderStageInfo.pName  = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -136,8 +136,8 @@ void Pipeline::CreateGraphicsPipelineFromModules(VkShaderModule vertShaderModule
 
 void Pipeline::Initialize(VkDevice device,
                             VkRenderPass renderPass,
-                            VkShaderModule vertShaderModule,
-                            VkShaderModule fragShaderModule,
+                            const PipelineShaderStage& vertStage,
+                            const PipelineShaderStage& fragStage,
                             VkExtent2D extent) {
     device_ = device;
     logger_.Log(LogLevel::INFO, std::format("Creating graphics pipeline with render pass {:#010x}, extent {}x{}",
@@ -149,10 +149,10 @@ void Pipeline::Initialize(VkDevice device,
     CreateGraphicsPipelineLayout();
 
     // Create the graphics pipeline from the loaded modules
-    CreateGraphicsPipelineFromModules(vertShaderModule, fragShaderModule, renderPass, extent);
-    
-    vkDestroyShaderModule(device, vertShaderModule, nullptr);
-    vkDestroyShaderModule(device, fragShaderModule, nullptr);
+    CreateGraphicsPipelineFromModules(vertStage, fragStage, renderPass, extent);
+
+    vkDestroyShaderModule(device, vertStage.module, nullptr);
+    vkDestroyShaderModule(device, fragStage.module, nullptr);
 }
 
 void Pipeline::Shutdown() {

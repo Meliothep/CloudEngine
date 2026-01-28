@@ -40,8 +40,8 @@ void VulkanRenderer::Initialize(IWindow* window) {
         pipeline_->Initialize(
             device_->GetDevice(),
             renderPass_->GetRenderPass(),
-            vertShaderModule_->GetModule(),
-            fragShaderModule_->GetModule(),
+            {vertShaderModule_->GetModule(), VK_SHADER_STAGE_VERTEX_BIT},
+            {fragShaderModule_->GetModule(), VK_SHADER_STAGE_FRAGMENT_BIT},
             swapchain_->GetExtent()
         );
 
