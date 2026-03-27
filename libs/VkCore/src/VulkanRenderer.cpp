@@ -1,4 +1,5 @@
 #include "VulkanRenderer.hpp"
+#include "Pipeline/PipelineBuilder.hpp"
 
 void VulkanRenderer::Initialize(IWindow* window) {
     window_ = window;
@@ -22,7 +23,7 @@ void VulkanRenderer::Initialize(IWindow* window) {
             device_->GetQueueFamilyIndices(),
             window
         );    
-
+        
         renderPass_ = std::make_unique<RenderPass>(logger_);
         renderPass_->Initialize( 
             device_->GetDevice(), 
@@ -37,13 +38,22 @@ void VulkanRenderer::Initialize(IWindow* window) {
 
 
         pipeline_ = std::make_unique<Pipeline>(logger_);
-        pipeline_->Initialize(
-            device_->GetDevice(),
-            renderPass_->GetRenderPass(),
-            {vertShaderModule_->GetModule(), VK_SHADER_STAGE_VERTEX_BIT},
-            {fragShaderModule_->GetModule(), VK_SHADER_STAGE_FRAGMENT_BIT},
-            swapchain_->GetExtent()
-        );
+        pipeline_->CreateLayout(device_->GetDevice(), 0, nullptr, 0, nullptr);
+
+        // 2. Configure and build the Pipeline
+        auto bindingDesc = Vertex::GetBindingDescription();
+        auto attrDescs = Vertex::GetAttributeDescriptions();
+
+        PipelineBuilder builder(device_->GetDevice(), logger_);
+        builder.AddShaderStage({vertShaderModule_->GetModule(), VK_SHADER_STAGE_VERTEX_BIT})
+            .AddShaderStage({fragShaderModule_->GetModule(), VK_SHADER_STAGE_FRAGMENT_BIT})
+            .SetVertexInput(1, &bindingDesc, (uint32_t)attrDescs.size(), attrDescs.data())
+            .SetPipelineLayout(pipeline_->GetPipelineLayout())
+            .SetRenderPass(renderPass_->GetRenderPass())
+            .SetRasterizer(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+
+        // This calls pipeline->Create(...) internally and returns the unique_ptr
+        pipeline_ = builder.Build();
 
         std::vector<std::vector<VkImageView>> attachmentsPerFramebuffer;
         for (auto& imageView : swapchain_->GetImageViews()) {
@@ -101,9 +111,15 @@ void VulkanRenderer::Shutdown(){
     command_->Shutdown();
     command_ = nullptr;
 
+    vertShaderModule_->Shutdown();
+    vertShaderModule_ = nullptr;
+
+    fragShaderModule_->Shutdown();
+    fragShaderModule_ = nullptr;
+
     pipeline_->Shutdown();
     pipeline_ = nullptr;
-
+    
     mesh_->Shutdown();
     mesh_.reset();
 
