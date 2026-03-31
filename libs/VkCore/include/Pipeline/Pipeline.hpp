@@ -14,10 +14,6 @@ public:
     // NEW: The primary entry point for the Builder
     void Initialize(VkDevice device, const VkGraphicsPipelineCreateInfo& pipelineInfo);
 
-    // Helper to create a layout (can be called before Initialize)
-    void CreateLayout(VkDevice device, uint32_t setLayoutCount, const VkDescriptorSetLayout* pSetLayouts, 
-                      uint32_t pushConstantRangeCount, const VkPushConstantRange* pPushConstantRanges);
-
     void Shutdown();
 
     VkPipeline GetPipeline() const { return graphicsPipeline_; }

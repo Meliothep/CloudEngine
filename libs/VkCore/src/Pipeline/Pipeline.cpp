@@ -1,23 +1,6 @@
 #include "Pipeline/Pipeline.hpp"
 #include <stdexcept>
 
-void Pipeline::CreateLayout(VkDevice device, uint32_t setLayoutCount, const VkDescriptorSetLayout* pSetLayouts, 
-                            uint32_t pushConstantRangeCount, const VkPushConstantRange* pPushConstantRanges) {
-    device_ = device;
-
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = setLayoutCount;
-    pipelineLayoutInfo.pSetLayouts = pSetLayouts;
-    pipelineLayoutInfo.pushConstantRangeCount = pushConstantRangeCount;
-    pipelineLayoutInfo.pPushConstantRanges = pPushConstantRanges;
-
-    if (vkCreatePipelineLayout(device_, &pipelineLayoutInfo, nullptr, &pipelineLayout_) != VK_SUCCESS) {
-        logger_.Log(LogLevel::EXCEPT, "Failed to create pipeline layout");
-        throw std::runtime_error("failed to create pipeline layout!");
-    }
-}
-
 void Pipeline::Initialize(VkDevice device, const VkGraphicsPipelineCreateInfo& pipelineInfo) {
     device_ = device;
     

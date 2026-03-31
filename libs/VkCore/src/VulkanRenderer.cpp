@@ -36,24 +36,24 @@ void VulkanRenderer::Initialize(IWindow* window) {
         fragShaderModule_  = std::make_unique<ShaderModule>(logger_); 
         fragShaderModule_->Initialize(device_->GetDevice(), "triangle.frag");
 
-
-        pipeline_ = std::make_unique<Pipeline>(logger_);
-        pipeline_->CreateLayout(device_->GetDevice(), 0, nullptr, 0, nullptr);
-
-        // 2. Configure and build the Pipeline
         auto bindingDesc = Vertex::GetBindingDescription();
-        auto attrDescs = Vertex::GetAttributeDescriptions();
-
+        auto attrDescs   = Vertex::GetAttributeDescriptions();
+        
         PipelineBuilder builder(device_->GetDevice(), logger_);
-        builder.AddShaderStage({vertShaderModule_->GetModule(), VK_SHADER_STAGE_VERTEX_BIT})
+        pipeline_ = builder
+            .AddShaderStage({vertShaderModule_->GetModule(), VK_SHADER_STAGE_VERTEX_BIT})
             .AddShaderStage({fragShaderModule_->GetModule(), VK_SHADER_STAGE_FRAGMENT_BIT})
             .SetVertexInput(1, &bindingDesc, (uint32_t)attrDescs.size(), attrDescs.data())
-            .SetPipelineLayout(pipeline_->GetPipelineLayout())
+            .SetInputAssembly(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+            .SetRasterizer(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE)
+            .SetMultisampling(VK_SAMPLE_COUNT_1_BIT)
+            .SetColorBlend(VK_FALSE)
+            .SetDepthStencil(VK_FALSE, VK_FALSE, VK_COMPARE_OP_LESS)
+            .SetViewportState(1, 1)
+            .SetDynamicStates({VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR})
+            .SetPipelineLayout(0, nullptr, 0, nullptr)
             .SetRenderPass(renderPass_->GetRenderPass())
-            .SetRasterizer(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
-
-        // This calls pipeline->Create(...) internally and returns the unique_ptr
-        pipeline_ = builder.Build();
+            .Build();
 
         std::vector<std::vector<VkImageView>> attachmentsPerFramebuffer;
         for (auto& imageView : swapchain_->GetImageViews()) {

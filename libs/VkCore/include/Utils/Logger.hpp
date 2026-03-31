@@ -42,9 +42,9 @@ public:
     }
 
     template <typename... T>
-    void Log(LogLevel logLevel, std::string message, T&&... args) {
+    void Log(LogLevel logLevel, std::format_string<T...> fmt, T&&... args) {
         try {
-            Log(logLevel, std::format(message, std::forward<T>(args)...));
+            Log(logLevel, std::format(fmt, std::forward<T>(args)...));
         }
         catch (const std::format_error& e) {
             Log(LogLevel::EXCEPT, "Formatting error: " + std::string(e.what()));
