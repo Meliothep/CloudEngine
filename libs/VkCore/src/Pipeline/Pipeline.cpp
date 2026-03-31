@@ -3,11 +3,7 @@
 
 void Pipeline::Initialize(VkDevice device, const VkGraphicsPipelineCreateInfo& pipelineInfo) {
     device_ = device;
-    
-    // Safety check: if layout wasn't created externally, use the one passed in info
-    if (pipelineLayout_ == VK_NULL_HANDLE) {
-        pipelineLayout_ = pipelineInfo.layout;
-    }
+    pipelineLayout_ = pipelineInfo.layout;
 
     if (vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline_) != VK_SUCCESS) {
         logger_.Log(LogLevel::EXCEPT, "Failed to create graphics pipeline");

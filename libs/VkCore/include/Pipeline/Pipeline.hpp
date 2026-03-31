@@ -9,9 +9,8 @@ struct PipelineShaderStage {
 class Pipeline {
 public:
     Pipeline(Logger& logger) : logger_(logger) {}
-    ~Pipeline() = default; // Ensure cleanup
+    ~Pipeline() = default;
 
-    // NEW: The primary entry point for the Builder
     void Initialize(VkDevice device, const VkGraphicsPipelineCreateInfo& pipelineInfo);
 
     void Shutdown();

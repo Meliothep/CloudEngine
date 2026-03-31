@@ -8,7 +8,6 @@ public:
     PipelineBuilder(VkDevice device, Logger& logger) 
         : device_(device), logger_(logger) {}
 
-    // Required — must call before Build()
     PipelineBuilder& AddShaderStage(PipelineShaderStage shaderStage);
     PipelineBuilder& SetVertexInput(uint32_t bindingCount, const VkVertexInputBindingDescription* bindings,
                                     uint32_t attrCount, const VkVertexInputAttributeDescription* attributes);
@@ -24,7 +23,6 @@ public:
     PipelineBuilder& SetPipelineLayout(uint32_t setLayoutCount, const VkDescriptorSetLayout* pSetLayouts,
                                    uint32_t pushConstantRangeCount, const VkPushConstantRange* pPushConstantRanges);
 
-    // Builds the pipeline — throws if any required state is missing
     std::unique_ptr<Pipeline> Build();
 
 private:
