@@ -61,7 +61,7 @@ void RenderPass::Shutdown() {
     logger_.Log(LogLevel::INFO, "Render pass destroyed successfully");
 }
 
-void RenderPass::BeginRenderPass(VkCommandBuffer cmdBuffer, VkFramebuffer framebuffer, VkExtent2D extent, const VkClearValue* clearValues, uint32_t clearValueCount) {
+void RenderPass::BeginRenderPass(VkCommandBuffer cmdBuffer, VkFramebuffer framebuffer, VkExtent2D extent, const VkClearValue clearValues, uint32_t clearValueCount) {
     if (renderPass_ == VK_NULL_HANDLE) {
         logger_.Log(LogLevel::EXCEPT, "BeginRenderPass called but renderPass_ is VK_NULL_HANDLE");
         throw std::runtime_error("Render pass not created");
@@ -76,7 +76,7 @@ void RenderPass::BeginRenderPass(VkCommandBuffer cmdBuffer, VkFramebuffer frameb
     renderPassInfo.renderArea.extent = extent;
 
     renderPassInfo.clearValueCount = clearValueCount;
-    renderPassInfo.pClearValues = clearValues;
+    renderPassInfo.pClearValues = &clearValues;
 
     vkCmdBeginRenderPass(cmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }

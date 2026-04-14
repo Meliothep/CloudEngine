@@ -9,7 +9,7 @@ public:
     void Initialize(VkDevice device, VkFormat swapchainImageFormat);
     void Shutdown();
     
-    void BeginRenderPass(VkCommandBuffer cmdBuffer, VkFramebuffer framebuffer, VkExtent2D extent, const VkClearValue* clearValues, uint32_t clearValueCount);
+    void BeginRenderPass(VkCommandBuffer cmdBuffer, VkFramebuffer framebuffer, VkExtent2D extent, const VkClearValue clearValues, uint32_t clearValueCount);
     void EndRenderPass(VkCommandBuffer cmdBuffer);
 
     VkRenderPass GetRenderPass() const { return renderPass_; }

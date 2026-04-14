@@ -63,7 +63,7 @@ void Command::Initialize(VkDevice device, QueueFamilyIndices indices, uint32_t s
     logger_.Log(LogLevel::INFO, "Command initialized");
 }
 
-VkCommandBuffer Command::BeginFrame(uint32_t imageIndex) {
+void Command::BeginFrame(uint32_t imageIndex) {
     VkCommandBuffer cmd = commandBuffers_[imageIndex];
 
     vkResetCommandBuffer(cmd, 0);
@@ -75,16 +75,19 @@ VkCommandBuffer Command::BeginFrame(uint32_t imageIndex) {
     if (vkBeginCommandBuffer(cmd, &begin) != VK_SUCCESS) {
         throw std::runtime_error("Failed to begin command buffer");
     }
-
-    return cmd;
 }
 
-void Command::EndFrame(VkCommandBuffer cmd) {
+void Command::EndFrame(uint32_t bufferIndex) {
+    VkCommandBuffer cmd = commandBuffers_[bufferIndex];
     if (vkEndCommandBuffer(cmd) != VK_SUCCESS) {
         throw std::runtime_error("Failed to record command buffer");
     }
 }
 
+void Command::BindPipeline(uint32_t bufferIndex, VkPipeline pipeline) {
+    VkCommandBuffer cmd = commandBuffers_[bufferIndex];
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+}
 
 void Command::Shutdown() {
     if (commandPool_ != VK_NULL_HANDLE) {

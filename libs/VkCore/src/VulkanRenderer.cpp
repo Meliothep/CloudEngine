@@ -187,25 +187,14 @@ void VulkanRenderer::DrawFrame() {
                           VK_NULL_HANDLE,
                           &imageIndex);
 
-    VkCommandBuffer cmd = command_->BeginFrame(imageIndex);
+    command_->BeginFrame(imageIndex);
+    VkCommandBuffer cmd = command_->GetCommandBuffer(imageIndex);
 
-    VkRenderPassBeginInfo rpInfo{};
-    rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    rpInfo.renderPass = renderPass_->GetRenderPass();
-    rpInfo.framebuffer = swapchainFramebuffer_->GetFramebuffers()[imageIndex];
-    rpInfo.renderArea.offset = {0,0};
-    rpInfo.renderArea.extent = swapchain_->GetExtent();
-
-    VkClearValue clearColor{};
-    clearColor.color = {0.f, 0.f, 0.f, 1.0f};
-    rpInfo.clearValueCount = 1;
-    rpInfo.pClearValues = &clearColor;
-
-    vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
-
+    renderPass_->BeginRenderPass(cmd, swapchainFramebuffer_->GetFramebuffers()[imageIndex], swapchain_->GetExtent(), {0.f, 0.f, 0.f, 1.0f}, 1);
     // Bind our graphics pipeline and draw the triangle mesh if present
     if (pipeline_ && mesh_) {
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetPipeline());
+        command_->BindPipeline(imageIndex, pipeline_->GetPipeline());
+        
         // Provide dynamic viewport and scissor if the pipeline expects them
         VkExtent2D extent = swapchain_->GetExtent();
         VkViewport viewport{};
@@ -223,7 +212,7 @@ void VulkanRenderer::DrawFrame() {
         vkCmdSetScissor(cmd, 0, 1, &scissor);
         
         mesh_->Bind(cmd);
-
+        
         vkCmdDraw(cmd, 3, 1, 0, 0);
     }
 
@@ -231,9 +220,9 @@ void VulkanRenderer::DrawFrame() {
         command->Record(cmd);
     }
 
-    vkCmdEndRenderPass(cmd);
+    renderPass_->EndRenderPass(cmd);
 
-    command_->EndFrame(cmd);
+    command_->EndFrame(imageIndex);
 
     // Submit
     VkSubmitInfo submitInfo{};
